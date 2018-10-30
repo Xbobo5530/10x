@@ -15,79 +15,9 @@ class RundownPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-//    _computeRunDown(String runDown, String draw) {
-//      var runDownFirstPos = int.parse(runDown[0]);
-//      var runDownSecondPos = int.parse(runDown[1]);
-//      var runDownThirdPos = int.parse(runDown[2]);
-//
-//      var drawFirstPos = int.parse(draw[0]);
-//      var drawSecondPos = int.parse(draw[1]);
-//      var drawThirdPos = int.parse(draw[2]);
-//      print(
-//          'rFirst: $runDownFirstPos, rSecond: $runDownSecondPos, rThird: $runDownThirdPos\n'
-//          'dFirst $drawFirstPos, dSecond: $drawSecondPos, dThird: $drawThirdPos');
-//
-//      var runDownMatrix = List(12);
-//      runDownMatrix[0] = [runDownFirstPos, runDownSecondPos, runDownThirdPos];
-//      runDownMatrix[1] = [drawFirstPos, drawSecondPos, drawThirdPos];
-//
-//      for (var i = 0; i < 12; i++) {
-//        if (i < 10) {
-//          runDownMatrix[i + 2] = [
-//            (runDownMatrix[0][0] + runDownMatrix[i + 1][0]) % 10,
-//            (runDownMatrix[0][1] + runDownMatrix[i + 1][1]) % 10,
-//            (runDownMatrix[0][2] + runDownMatrix[i + 1][2]) % 10,
-//          ];
-//        }
-//      }
-//
-//      print(runDownMatrix);
-//
-////      setState(() {
-////        _resultsSection = Container(
-////            child: Padding(
-////          padding: const EdgeInsets.only(left: 70.0, right: 70.0),
-////          child: GridView.builder(
-////              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-////                  crossAxisCount: 4, childAspectRatio: 1.0),
-////              itemCount: 52,
-////              itemBuilder: ((_, index) {
-////                var singleList = [];
-////                var rowCount = 1;
-////                runDownMatrix.forEach((row) {
-////                  for (var i = 0; i < row.length; i++) {
-////                    if (i % 3 == 0) {
-////                      singleList.add(rowCount);
-////                      rowCount++;
-////                    }
-////                    singleList.add(row[i]);
-////                  }
-////                });
-////                return Padding(
-////                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-////                  child: Center(
-////                      child: Container(
-////                          height: 50.0,
-////                          width: 50.0,
-////                          decoration: BoxDecoration(
-////                              shape: BoxShape.circle,
-////                              color:
-////                                  index % 4 == 0 ? Colors.black : Colors.brown),
-////                          child: Center(
-////                              child: Text(
-////                            '${singleList[index]}',
-////                            style: TextStyle(color: Colors.white),
-////                          )))),
-////                );
-////              })),
-////        ));
-////      });
-//    }
-
-    var _runDownResultSection = ScopedModelDescendant<MainModel>(
+    final _runDownResultSection = ScopedModelDescendant<MainModel>(
       builder: (BuildContext context, Widget child, MainModel model) {
-        if (model.rundownSingleList.isEmpty)
-          return Container(child: Text('rundown liat is empty'));
+        if (model.rundownSingleList.isEmpty) return Container();
         return Container(
             child: Padding(
           padding: const EdgeInsets.only(left: 70.0, right: 70.0),
@@ -96,21 +26,9 @@ class RundownPage extends StatelessWidget {
                   crossAxisCount: 4, childAspectRatio: 1.0),
               itemCount: 52,
               itemBuilder: ((_, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Center(
-                      child: Container(
-                          height: 50.0,
-                          width: 50.0,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color:
-                                  index % 4 == 0 ? Colors.black : Colors.brown),
-                          child: Center(
-                              child: Text(
-                            '${model.rundownSingleList[index]}',
-                            style: TextStyle(color: Colors.white),
-                          )))),
+                return RundownGridItemView(
+                  index: index,
+                  rundownItem: model.rundownSingleList[index],
                 );
               })),
         ));
@@ -122,11 +40,11 @@ class RundownPage extends StatelessWidget {
     _checkInputValidity(MainModel model, TextEditingController drawController,
         TextEditingController rundownController) {
       print('at compute rundown');
-      var runDown = _rundownController.text.trim();
-      var draw = _drawController.text.trim();
-      runDown.isNotEmpty && draw.isNotEmpty
-          ? model.computeRunDown(runDown, draw)
-          : _promptEmptyFields();
+      final runDown = _rundownController.text.trim();
+      final draw = _drawController.text.trim();
+      if (runDown.isEmpty || draw.isEmpty) _promptEmptyFields();
+      model.computeRunDown(runDown, draw);
+      FocusScope.of(context).requestFocus(FocusNode());
     }
 
     var _runDownField = Container(
@@ -189,6 +107,30 @@ class RundownPage extends StatelessWidget {
         _computeButton,
         Expanded(child: _runDownResultSection),
       ],
+    );
+  }
+}
+
+class RundownGridItemView extends StatelessWidget {
+  final int index;
+  final int rundownItem;
+  RundownGridItemView({this.index, this.rundownItem});
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Center(
+          child: Container(
+              height: 50.0,
+              width: 50.0,
+              decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: index % 4 == 0 ? Colors.black : Colors.brown),
+              child: Center(
+                  child: Text(
+                '$rundownItem',
+                style: TextStyle(color: Colors.white),
+              )))),
     );
   }
 }

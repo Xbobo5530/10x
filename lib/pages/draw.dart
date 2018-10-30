@@ -1,216 +1,126 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
-import 'package:tatua/models/result.dart';
-import 'package:tatua/pages/run_down.dart';
+import 'package:scoped_model/scoped_model.dart';
+import 'package:tatua/models/main_model.dart';
 import 'package:tatua/values/strings.dart';
 import 'package:tatua/views/results_item_view.dart';
 
-class DrawsPage extends StatefulWidget {
-  @override
-  _DrawsPageState createState() => _DrawsPageState();
-}
-
-class _DrawsPageState extends State<DrawsPage> {
-  var _searchFieldController = new TextEditingController();
-  var _pageCountLimit = 10.0;
-  List<Result> results = new List();
-  var _messageSection = new Container();
-  var _resultsSection = new Container();
-  var _isSearching = false;
-  var _searchButton;
-  var _loadingSection = Container();
-  var _body;
-
+class DrawsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    _fetchData(int _pageNumber, String query, int limit) async {
-      var url = '$TATU_URL_HEAD$_pageNumber';
-      await http
-          .get(url, headers: {'User-Agent': 'Mozilla/5.0'}).then((response) {
-        if (response.statusCode == 200) {
-          _body = response.body;
-          var queryPos = _body.indexOf('<td>$query</td>');
-          if (queryPos != -1) {
-            // query exists on current page
-            print('found $query on current page');
-            //get the page url
-            var pageUrl = '$TATU_URL_HEAD$_pageNumber';
-            var randStartPost = 100;
-            /*'375</td> <td>Sun 16th Sep 2018 - 6:20:00</td>'.length;*/
-            var randomStartPosForDate = queryPos - randStartPost;
-            var datePos =
-                _body.indexOf('<td>', randomStartPosForDate) + '<td>'.length;
-            var dateEndPos = _body.indexOf('</td>', datePos);
-            var date = _body.substring(datePos, dateEndPos);
-            print('the date is $date');
-            var result = Result(pageUrl, _pageNumber, date);
-            setState(() {
-              results.add(result);
-              _resultsSection = Container(
-                height: 40.0,
-                child: ListView.builder(
-                  itemCount: results.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    if (results.isNotEmpty) {
-                      var result = results[index];
-                      return ResultItemView(result);
-                    }
-                  },
-                ),
-              );
-            });
-            _pageNumber++;
-          } else {
-            //query not found on current page
-            _pageNumber++;
-            print('query not found');
-          }
-          if (_pageNumber == limit) {
-            setState(() {
-              _messageSection = Container(
-                child: Center(
-                  child: Text(
-                    'Finished searching\nFound ${results.length} results',
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              );
-              _isSearching = false;
-            });
-          }
-        } else {
-          _messageSection = Container(
-            child: Center(
-              child: Text(
-                'Please check your network\n'
-                    'The status code is: ${response.statusCode}\n'
-                    'The message is: ${response.reasonPhrase}',
-                textAlign: TextAlign.center,
-              ),
-            ),
-          );
-        }
-      });
-    }
+    final _drawController = TextEditingController();
+    final _limitController = TextEditingController();
 
-    _search(String query, int pageCountLimit) async {
-      results.clear();
-      _resultsSection = Container();
-      for (var _pageNumber = 1; _pageNumber <= pageCountLimit; _pageNumber++) {
-        print(_pageNumber);
-        if (_isSearching) {
-          Container(
-            child: LinearProgressIndicator(),
-          );
-          await _fetchData(_pageNumber, query, pageCountLimit);
-        } else {
-          _loadingSection = Container();
-          break;
-        }
-      }
-    }
-
-    _startSearch() {
+    _startSearch(MainModel model) {
       print('start search is called');
-      var query = _searchFieldController.text;
-      if (query.isNotEmpty) {
-        setState(() {
-          _isSearching = true;
-          FocusScope.of(context).requestFocus(FocusNode());
-          _searchFieldController.clear();
-          _search(query, _pageCountLimit.round());
-        });
-      } else {
-        _messageSection = Container(
-          child: Text(
-            enterDrawText,
-            textAlign: TextAlign.center,
-          ),
-        );
+
+      final draw = _drawController.text.trim();
+      final limit = _limitController.text.trim();
+
+      if (draw.isNotEmpty && limit.isNotEmpty) {
+        model.search(draw, limit);
+        _drawController.clear();
+        _limitController.clear();
+        FocusScope.of(context).requestFocus(FocusNode());
       }
     }
 
-    _stopSearch() {
+    _stopSearch(MainModel model) {
       print('stop search is called');
-      setState(() {
-        _isSearching = false;
-      });
+      model.cancelSearch();
+      final snackBar = SnackBar(content: Text(model.searchResultMessage));
+      Scaffold.of(context).showSnackBar(snackBar);
     }
 
-    _searchButton = RaisedButton(
-        color: _isSearching ? Colors.red : Colors.brown,
-        textColor: Colors.white,
-        child: _isSearching ? Text(stopText) : Text(searchText),
-        onPressed: _isSearching ? () => _stopSearch() : () => _startSearch());
-
-    return Scaffold(
-        appBar: AppBar(
-          title: Text(APP_NAME),
+    final _drawField = Container(
+      width: 150.0,
+      child: TextField(
+        maxLength: 3,
+        controller: _drawController,
+        textAlign: TextAlign.center,
+        keyboardType: TextInputType.numberWithOptions(),
+        decoration: InputDecoration(
+          labelText: enterDrawHint,
         ),
-        body: PageView(
-          children: <Widget>[
-            Column(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: <Widget>[
-                      Expanded(
-                          child: TextField(
-                        textAlign: TextAlign.center,
-                        maxLength: 3,
-                        decoration: InputDecoration(
-                            labelText: textFieldLabelText,
-                            labelStyle: TextStyle(
-                              fontSize: 30.0,
-                            )),
-                        autofocus: false,
-                        controller: _searchFieldController,
-                        keyboardType: TextInputType.numberWithOptions(),
-                      )),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Slider(
-                      min: 10.0,
-                      max: 1000.0,
-                      divisions: 99,
-                      value: _pageCountLimit,
-                      onChanged: (value) {
-                        setState(() {
-                          _pageCountLimit = value;
-                        });
-                      }),
-                ),
-                Text(
-                    'Search ${_searchFieldController.text} through ${_pageCountLimit.round()} page(s)'),
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: _searchButton,
-                      ),
-                    ),
-                  ],
-                ),
-                Expanded(child: _resultsSection),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Expanded(child: _messageSection),
-                  ],
-                ),
-                _loadingSection = _isSearching
-                    ? Container(child: LinearProgressIndicator())
-                    : Container(),
-              ],
-            ),
-            RundownPage(),
-          ],
-        ));
+      ),
+    );
+
+    final _limitField = Container(
+      width: 150.0,
+      child: TextField(
+        controller: _limitController,
+        textAlign: TextAlign.center,
+        keyboardType: TextInputType.numberWithOptions(),
+        decoration: InputDecoration(
+          labelText: enterLimitHint,
+        ),
+      ),
+    );
+
+    final _fields = Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: <Widget>[
+        _drawField,
+        _limitField,
+      ],
+    );
+
+    final _searchButton = Row(
+      children: <Widget>[
+        Expanded(
+          child: ScopedModelDescendant<MainModel>(
+            builder: (BuildContext context, Widget child, MainModel model) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: RaisedButton(
+                    textColor: Colors.white,
+                    color: model.isSearching ? Colors.red : Colors.brown,
+                    child: Text(model.isSearching ? cancelText : searchText),
+                    onPressed: model.isSearching
+                        ? () => _stopSearch(model)
+                        : () => _startSearch(model)),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+
+    final _loadingSection = ScopedModelDescendant<MainModel>(
+      builder: (BuildContext context, Widget child, MainModel model) {
+        return model.isSearching ? LinearProgressIndicator() : Container();
+      },
+    );
+
+    final _resultsSection = ScopedModelDescendant<MainModel>(
+      builder: (BuildContext context, Widget child, MainModel model) {
+        return ListView.builder(
+            itemCount: model.drawsSearchResults.length,
+            itemBuilder: ((context, index) {
+              if (model.drawsSearchResults.length == 0) return Container();
+              return ResultItemView(
+                result: model.drawsSearchResults[index],
+              );
+            }));
+      },
+    );
+
+    final _messageSection = ScopedModelDescendant<MainModel>(
+      builder: (BuildContext context, Widget child, MainModel model) {
+        return model.searchResultMessage != null
+            ? Text(model.searchResultMessage)
+            : Container();
+      },
+    );
+
+    return Column(
+      children: <Widget>[
+        _fields,
+        _searchButton,
+        Expanded(child: _resultsSection),
+        _messageSection,
+        _loadingSection
+      ],
+    );
   }
 }

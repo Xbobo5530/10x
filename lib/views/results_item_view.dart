@@ -4,7 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 class ResultItemView extends StatelessWidget {
   final Result result;
-  ResultItemView(this.result);
+  ResultItemView({this.result});
 
   @override
   Widget build(BuildContext context) {

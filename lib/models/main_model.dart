@@ -1,6 +1,87 @@
 import 'package:scoped_model/scoped_model.dart';
+import 'package:tatua/models/result.dart';
+import 'package:tatua/values/strings.dart';
+import 'package:http/http.dart' as http;
 
-class MainModel extends Model {
+abstract class DrawModel extends Model {
+  StatusCode _drawsSearchStatus;
+  StatusCode get drawsSearchStatus => _drawsSearchStatus;
+  List<Result> _drawsSearchResults = <Result>[];
+  List<Result> get drawsSearchResults => _drawsSearchResults;
+  bool _isSearching = false;
+  bool get isSearching => _isSearching;
+  String _searchResultMessage;
+  String get searchResultMessage => _searchResultMessage;
+  int _currentPageNumber = 1;
+
+  search(String query, String pageCountLimitString) {
+    _isSearching = true;
+    notifyListeners();
+
+    final pageCountLimit = int.parse(pageCountLimitString);
+    _drawsSearchResults.clear();
+    for (_currentPageNumber = 1;
+        _currentPageNumber <= pageCountLimit;
+        _currentPageNumber++) {
+      print(_currentPageNumber);
+      if (!_isSearching) break;
+      _fetchData(query, pageCountLimit);
+    }
+  }
+
+  cancelSearch() {
+    _isSearching = false;
+    _searchResultMessage = 'Search has been canceled';
+    notifyListeners();
+  }
+
+  _fetchData(String query, int limit) async {
+    if (_currentPageNumber == limit) _isSearching = false;
+
+    var url = '$TATU_URL_HEAD$_currentPageNumber';
+
+    final http.Response res =
+        await http.get(url, headers: {'User-Agent': 'Mozilla/5.0'});
+    if (res.statusCode != 200)
+      _drawsSearchStatus = StatusCode.failed;
+    else {
+      final _body = res.body;
+      _checkIfPageContainsQuery(_body, query, limit);
+    }
+  }
+
+  void _checkIfPageContainsQuery(String body, String query, int limit) {
+    var queryPos = body.indexOf('<td>$query</td>');
+    if (queryPos == -1)
+      _currentPageNumber++;
+    else {
+      print('found $query on current page');
+      final pageUrl = '$TATU_URL_HEAD$_currentPageNumber';
+      final randStartPost = 100;
+      /*'375</td> <td>Sun 16th Sep 2018 - 6:20:00</td>'.length;*/
+      final randomStartPosForDate = queryPos - randStartPost;
+      final datePos =
+          body.indexOf('<td>', randomStartPosForDate) + '<td>'.length;
+      final dateEndPos = body.indexOf('</td>', datePos);
+      final date = body.substring(datePos, dateEndPos);
+      print('the date is $date');
+      final result = Result(pageUrl, _currentPageNumber, date);
+      drawsSearchResults.add(result);
+      _currentPageNumber++;
+      notifyListeners();
+    }
+
+    if (_currentPageNumber == limit) {
+      _isSearching = false;
+      _searchResultMessage =
+          'Finished searching and found ${_drawsSearchResults.length} results';
+      notifyListeners();
+    }
+    notifyListeners();
+  }
+}
+
+abstract class RundownModel extends Model {
   List<int> _rundownSingleList = <int>[];
   List<int> get rundownSingleList => _rundownSingleList;
 
@@ -47,3 +128,7 @@ class MainModel extends Model {
     notifyListeners();
   }
 }
+
+class MainModel extends Model with DrawModel, RundownModel {}
+
+enum StatusCode { success, waiting, failed }
