@@ -47,7 +47,7 @@ class RundownPage extends StatelessWidget {
       FocusScope.of(context).requestFocus(FocusNode());
     }
 
-    var _runDownField = Container(
+    final _runDownField = Container(
       width: 150.0,
       child: TextField(
         maxLength: 3,
@@ -60,7 +60,7 @@ class RundownPage extends StatelessWidget {
       ),
     );
 
-    var _drawsField = Container(
+    final _drawsField = Container(
       width: 150.0,
       child: TextField(
         maxLength: 3,
@@ -73,7 +73,7 @@ class RundownPage extends StatelessWidget {
       ),
     );
 
-    var _computeButton = ScopedModelDescendant<MainModel>(
+    final _computeButton = ScopedModelDescendant<MainModel>(
       builder: (BuildContext context, Widget child, MainModel model) {
         return Padding(
           padding: const EdgeInsets.all(8.0),
@@ -92,7 +92,7 @@ class RundownPage extends StatelessWidget {
       },
     );
 
-    var _fields = Row(
+    final _fields = Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
         _runDownField,

@@ -5,22 +5,26 @@ import 'package:tatua/models/main_model.dart';
 import 'package:tatua/values/strings.dart';
 import 'package:tatua/views/results_item_view.dart';
 
+const tag = 'DrawsPage:';
+
 class DrawsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _drawController = TextEditingController();
-    final _limitController = TextEditingController();
+//    final _limitController = TextEditingController();
 
     _startSearch(MainModel model) {
       print('start search is called');
 
       final draw = _drawController.text.trim();
-      final limit = _limitController.text.trim();
+//      final limit = _limitController.text.trim();
 
-      if (draw.isNotEmpty && limit.isNotEmpty) {
-        model.search(draw, limit);
+      if (draw.isNotEmpty /* && limit.isNotEmpty*/) {
+        model.search(
+          draw, /*limit*/
+        );
         _drawController.clear();
-        _limitController.clear();
+//        _limitController.clear();
         FocusScope.of(context).requestFocus(FocusNode());
       }
     }
@@ -32,36 +36,41 @@ class DrawsPage extends StatelessWidget {
       Scaffold.of(context).showSnackBar(snackBar);
     }
 
-    final _drawField = Container(
-      width: 150.0,
-      child: TextField(
-        maxLength: 3,
-        controller: _drawController,
-        textAlign: TextAlign.center,
-        keyboardType: TextInputType.numberWithOptions(),
-        decoration: InputDecoration(
-          labelText: enterDrawHint,
+    final _drawField = Padding(
+      padding: const EdgeInsets.only(top: 16.0),
+      child: Container(
+        width: 200.0,
+        child: TextField(
+          maxLength: 3,
+          controller: _drawController,
+          textAlign: TextAlign.center,
+          keyboardType: TextInputType.numberWithOptions(),
+          decoration: InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: enterDrawHint,
+          ),
         ),
       ),
     );
 
-    final _limitField = Container(
-      width: 150.0,
-      child: TextField(
-        controller: _limitController,
-        textAlign: TextAlign.center,
-        keyboardType: TextInputType.numberWithOptions(),
-        decoration: InputDecoration(
-          labelText: enterLimitHint,
-        ),
-      ),
-    );
+//    final _limitField = Container(
+//      width: 150.0,
+//      child: TextField(
+//        maxLength: 6,
+//        controller: _limitController,
+//        textAlign: TextAlign.center,
+//        keyboardType: TextInputType.numberWithOptions(),
+//        decoration: InputDecoration(
+//          labelText: enterLimitHint,
+//        ),
+//      ),
+//    );
 
     final _fields = Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
         _drawField,
-        _limitField,
+//        _limitField,
       ],
     );
 
@@ -88,6 +97,7 @@ class DrawsPage extends StatelessWidget {
 
     final _loadingSection = ScopedModelDescendant<MainModel>(
       builder: (BuildContext context, Widget child, MainModel model) {
+        print('$tag isSearching is ${model.isSearching}');
         return model.isSearching ? LinearProgressIndicator() : Container();
       },
     );
@@ -113,9 +123,35 @@ class DrawsPage extends StatelessWidget {
       },
     );
 
+    final _slider = ScopedModelDescendant<MainModel>(
+      builder: (BuildContext context, Widget child, MainModel model) {
+        return Slider(
+          onChanged: (double value) => model.updateLimitValue(value),
+          value: model.limitValue,
+          min: 10.0,
+          max: 1000.0,
+          divisions: 99,
+        );
+      },
+    );
+
+    final _limitInfoSection = ScopedModelDescendant<MainModel>(
+      builder: (BuildContext context, Widget child, MainModel model) {
+        return Text(
+          'Search through ${model.limitValue.round()} pages',
+          style: TextStyle(
+            color: Colors.brown,
+            fontWeight: FontWeight.bold,
+          ),
+        );
+      },
+    );
+
     return Column(
       children: <Widget>[
         _fields,
+        _slider,
+        _limitInfoSection,
         _searchButton,
         Expanded(child: _resultsSection),
         _messageSection,

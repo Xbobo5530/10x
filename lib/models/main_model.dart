@@ -3,6 +3,8 @@ import 'package:tatua/models/result.dart';
 import 'package:tatua/values/strings.dart';
 import 'package:http/http.dart' as http;
 
+const tag = 'MainModel:';
+
 abstract class DrawModel extends Model {
   StatusCode _drawsSearchStatus;
   StatusCode get drawsSearchStatus => _drawsSearchStatus;
@@ -12,20 +14,32 @@ abstract class DrawModel extends Model {
   bool get isSearching => _isSearching;
   String _searchResultMessage;
   String get searchResultMessage => _searchResultMessage;
+  double _limitValue = 10.0;
+  double get limitValue => _limitValue;
   int _currentPageNumber = 1;
 
-  search(String query, String pageCountLimitString) {
+  updateLimitValue(double newValue) {
+    _limitValue = newValue;
+    notifyListeners();
+  }
+
+  search(String query) {
+    print('$tag isSearching is $_isSearching');
     _isSearching = true;
+    _drawsSearchResults.clear();
+    _currentPageNumber = 1;
     notifyListeners();
 
-    final pageCountLimit = int.parse(pageCountLimitString);
-    _drawsSearchResults.clear();
+    final pageCountLimit = _limitValue.round();
+
     for (_currentPageNumber = 1;
         _currentPageNumber <= pageCountLimit;
         _currentPageNumber++) {
       print(_currentPageNumber);
-      if (!_isSearching) break;
-      _fetchData(query, pageCountLimit);
+      if (!_isSearching)
+        break;
+      else
+        _fetchData(query);
     }
   }
 
@@ -35,27 +49,26 @@ abstract class DrawModel extends Model {
     notifyListeners();
   }
 
-  _fetchData(String query, int limit) async {
-    if (_currentPageNumber == limit) _isSearching = false;
-
-    var url = '$TATU_URL_HEAD$_currentPageNumber';
-
+  _fetchData(String query) async {
+    final url = '$TATU_URL_HEAD$_currentPageNumber';
     final http.Response res =
         await http.get(url, headers: {'User-Agent': 'Mozilla/5.0'});
-    if (res.statusCode != 200)
+    if (res.statusCode != 200) {
       _drawsSearchStatus = StatusCode.failed;
-    else {
+      _searchResultMessage = 'Error on fetching data}';
+      notifyListeners();
+    } else {
       final _body = res.body;
-      _checkIfPageContainsQuery(_body, query, limit);
+      _checkIfPageContainsQuery(_body, query);
     }
   }
 
-  void _checkIfPageContainsQuery(String body, String query, int limit) {
-    var queryPos = body.indexOf('<td>$query</td>');
+  _checkIfPageContainsQuery(String body, String query) {
+    final queryPos = body.indexOf('<td>$query</td>');
     if (queryPos == -1)
       _currentPageNumber++;
     else {
-      print('found $query on current page');
+      print('found $query on page $_currentPageNumber');
       final pageUrl = '$TATU_URL_HEAD$_currentPageNumber';
       final randStartPost = 100;
       /*'375</td> <td>Sun 16th Sep 2018 - 6:20:00</td>'.length;*/
@@ -68,14 +81,12 @@ abstract class DrawModel extends Model {
       final result = Result(pageUrl, _currentPageNumber, date);
       drawsSearchResults.add(result);
       _currentPageNumber++;
-      notifyListeners();
     }
 
-    if (_currentPageNumber == limit) {
+    if (_currentPageNumber == _limitValue.round()) {
       _isSearching = false;
       _searchResultMessage =
           'Finished searching and found ${_drawsSearchResults.length} results';
-      notifyListeners();
     }
     notifyListeners();
   }
@@ -86,18 +97,18 @@ abstract class RundownModel extends Model {
   List<int> get rundownSingleList => _rundownSingleList;
 
   computeRunDown(String runDown, String draw) {
-    var runDownFirstPos = int.parse(runDown[0]);
-    var runDownSecondPos = int.parse(runDown[1]);
-    var runDownThirdPos = int.parse(runDown[2]);
+    final runDownFirstPos = int.parse(runDown[0]);
+    final runDownSecondPos = int.parse(runDown[1]);
+    final runDownThirdPos = int.parse(runDown[2]);
 
-    var drawFirstPos = int.parse(draw[0]);
-    var drawSecondPos = int.parse(draw[1]);
-    var drawThirdPos = int.parse(draw[2]);
+    final drawFirstPos = int.parse(draw[0]);
+    final drawSecondPos = int.parse(draw[1]);
+    final drawThirdPos = int.parse(draw[2]);
     print(
         'rFirst: $runDownFirstPos, rSecond: $runDownSecondPos, rThird: $runDownThirdPos\n'
         'dFirst $drawFirstPos, dSecond: $drawSecondPos, dThird: $drawThirdPos');
 
-    var runDownMatrix = List(12);
+    final runDownMatrix = List(12);
     runDownMatrix[0] = [runDownFirstPos, runDownSecondPos, runDownThirdPos];
     runDownMatrix[1] = [drawFirstPos, drawSecondPos, drawThirdPos];
 
