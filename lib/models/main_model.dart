@@ -1,7 +1,7 @@
 import 'package:scoped_model/scoped_model.dart';
 
 class MainModel extends Model {
-  List<int> _rundownSingleList = [];
+  List<int> _rundownSingleList = <int>[];
   List<int> get rundownSingleList => _rundownSingleList;
 
   computeRunDown(String runDown, String draw) {
@@ -30,7 +30,7 @@ class MainModel extends Model {
       }
     }
 
-    var singleList = [];
+    var singleList = <int>[];
     var rowCount = 1;
     runDownMatrix.forEach((row) {
       for (var i = 0; i < row.length; i++) {
@@ -43,6 +43,7 @@ class MainModel extends Model {
     });
 
     print(runDownMatrix);
-    singleList = _rundownSingleList;
+    _rundownSingleList = singleList;
+    notifyListeners();
   }
 }

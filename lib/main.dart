@@ -1,19 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:tatua/models/main_model.dart';
 import 'package:tatua/pages/draw.dart';
 import 'package:tatua/values/strings.dart';
+import 'package:scoped_model/scoped_model.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(MyApp(model: MainModel()));
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+  final MainModel model;
+  MyApp({
+    Key key,
+    this.model,
+  }) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: APP_NAME,
-      theme: ThemeData(
-        primarySwatch: Colors.brown,
+    return ScopedModel<MainModel>(
+      model: model,
+      child: MaterialApp(
+        title: APP_NAME,
+        theme: ThemeData(
+          primarySwatch: Colors.brown,
+        ),
+        home: DrawsPage(),
       ),
-      home: DrawsPage(),
     );
   }
 }
