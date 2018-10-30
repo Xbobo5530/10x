@@ -1,0 +1,11 @@
+const APP_NAME = '10X';
+const TATU_URL_HEAD = 'http://tatumzuka.co.tz/results?page=';
+const searchText = 'Search';
+const stopText = 'Stop';
+const goText = 'Go';
+const textFieldLabelText = 'Enter a winning draw';
+const enterDrawText = 'Please enter a winning draw to continut';
+const drawsText = 'Draws';
+const rundownText = 'Run down';
+const enterRundownLabelText = 'Rundown figure';
+const computeRundownText = 'Compute';
