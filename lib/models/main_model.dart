@@ -16,7 +16,8 @@ abstract class DrawModel extends Model {
   String get searchResultMessage => _searchResultMessage;
   double _limitValue = 10.0;
   double get limitValue => _limitValue;
-  int _currentPageNumber = 1;
+  double _progressValue = 0.0;
+  double get progressValue => _progressValue;
 
   updateLimitValue(double newValue) {
     _limitValue = newValue;
@@ -24,22 +25,21 @@ abstract class DrawModel extends Model {
   }
 
   search(String query) {
-    print('$tag isSearching is $_isSearching');
     _isSearching = true;
     _drawsSearchResults.clear();
-    _currentPageNumber = 1;
+    print('$tag at search\nisSearching is $_isSearching');
     notifyListeners();
 
     final pageCountLimit = _limitValue.round();
 
-    for (_currentPageNumber = 1;
-        _currentPageNumber <= pageCountLimit;
-        _currentPageNumber++) {
-      print(_currentPageNumber);
-      if (!_isSearching)
+    for (var curPage = 1; curPage <= pageCountLimit; curPage++) {
+      print('$tag at for loop current page is $curPage');
+      print('$tag progress value is $_progressValue');
+      if (!_isSearching) {
+        print('$tag is not searching, breaking');
         break;
-      else
-        _fetchData(query);
+      } else
+        _fetchData(query, curPage);
     }
   }
 
@@ -49,27 +49,29 @@ abstract class DrawModel extends Model {
     notifyListeners();
   }
 
-  _fetchData(String query) async {
-    final url = '$TATU_URL_HEAD$_currentPageNumber';
+  _fetchData(String query, int curPage) async {
+    print('$tag at _fetchData');
+    final url = '$TATU_URL_HEAD$curPage';
     final http.Response res =
         await http.get(url, headers: {'User-Agent': 'Mozilla/5.0'});
+
     if (res.statusCode != 200) {
       _drawsSearchStatus = StatusCode.failed;
-      _searchResultMessage = 'Error on fetching data}';
+      _searchResultMessage = 'Error on fetching data from page $curPage';
+      _isSearching = false;
       notifyListeners();
     } else {
       final _body = res.body;
-      _checkIfPageContainsQuery(_body, query);
+      _checkIfPageContainsQuery(_body, query, curPage);
     }
   }
 
-  _checkIfPageContainsQuery(String body, String query) {
+  _checkIfPageContainsQuery(String body, String query, int curPage) {
+    print('$tag at _checkIfPageContainsQuery');
     final queryPos = body.indexOf('<td>$query</td>');
-    if (queryPos == -1)
-      _currentPageNumber++;
-    else {
-      print('found $query on page $_currentPageNumber');
-      final pageUrl = '$TATU_URL_HEAD$_currentPageNumber';
+    if (queryPos != -1) {
+      print('$tag found $query on page $curPage');
+      final pageUrl = '$TATU_URL_HEAD$curPage';
       final randStartPost = 100;
       /*'375</td> <td>Sun 16th Sep 2018 - 6:20:00</td>'.length;*/
       final randomStartPosForDate = queryPos - randStartPost;
@@ -78,16 +80,17 @@ abstract class DrawModel extends Model {
       final dateEndPos = body.indexOf('</td>', datePos);
       final date = body.substring(datePos, dateEndPos);
       print('the date is $date');
-      final result = Result(pageUrl, _currentPageNumber, date);
+      final result = Result(pageUrl, curPage, date);
       drawsSearchResults.add(result);
-      _currentPageNumber++;
     }
 
-    if (_currentPageNumber == _limitValue.round()) {
+    if (curPage == _limitValue.round()) {
       _isSearching = false;
       _searchResultMessage =
           'Finished searching and found ${_drawsSearchResults.length} results';
+      print('$tag at checking last page,\nisSearching is $_isSearching');
     }
+    _progressValue = curPage / _limitValue;
     notifyListeners();
   }
 }

@@ -11,20 +11,17 @@ class DrawsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _drawController = TextEditingController();
-//    final _limitController = TextEditingController();
 
     _startSearch(MainModel model) {
       print('start search is called');
 
       final draw = _drawController.text.trim();
-//      final limit = _limitController.text.trim();
 
-      if (draw.isNotEmpty /* && limit.isNotEmpty*/) {
+      if (draw.isNotEmpty) {
         model.search(
           draw, /*limit*/
         );
         _drawController.clear();
-//        _limitController.clear();
         FocusScope.of(context).requestFocus(FocusNode());
       }
     }
@@ -52,19 +49,6 @@ class DrawsPage extends StatelessWidget {
         ),
       ),
     );
-
-//    final _limitField = Container(
-//      width: 150.0,
-//      child: TextField(
-//        maxLength: 6,
-//        controller: _limitController,
-//        textAlign: TextAlign.center,
-//        keyboardType: TextInputType.numberWithOptions(),
-//        decoration: InputDecoration(
-//          labelText: enterLimitHint,
-//        ),
-//      ),
-//    );
 
     final _fields = Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -98,7 +82,11 @@ class DrawsPage extends StatelessWidget {
     final _loadingSection = ScopedModelDescendant<MainModel>(
       builder: (BuildContext context, Widget child, MainModel model) {
         print('$tag isSearching is ${model.isSearching}');
-        return model.isSearching ? LinearProgressIndicator() : Container();
+        return model.isSearching
+            ? LinearProgressIndicator(
+                value: model.progressValue,
+              )
+            : Container();
       },
     );
 
