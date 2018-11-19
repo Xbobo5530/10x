@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tatua/models/result.dart';
+import 'package:tatua/values/consts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ResultItemView extends StatelessWidget {
@@ -15,7 +16,10 @@ class ResultItemView extends StatelessWidget {
             title:
                 Text('Page ${result.pageNumber}'),
             subtitle: Text(
-              'Previous draw: ${result.lastDraw}\n${result.date}',
+              result.lastDraw.length == DRAW_ID_LENGTH 
+              ? 'This is the latest draw\n${result.date}'
+:              'Previous draw: ${result.lastDraw}\n${result.date}'
+              ,
             ),
           ),
           onTap: () => _launchURL(result.url),

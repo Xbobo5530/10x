@@ -1,1 +1,2 @@
 const STEPS_TO_PREV_DRAW = 487;
+const DRAW_ID_LENGTH = 5;
