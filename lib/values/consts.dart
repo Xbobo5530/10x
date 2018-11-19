@@ -1,0 +1,1 @@
+const STEPS_TO_PREV_DRAW = 487;

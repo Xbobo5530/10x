@@ -11,10 +11,11 @@ class ResultItemView extends StatelessWidget {
     return Column(
       children: <Widget>[
         InkWell(
-          child: new ListTile(
-            title: Text('Page ${result.pageNumber}'),
+          child: ListTile(
+            title:
+                Text('Page ${result.pageNumber}'),
             subtitle: Text(
-              '${result.date}',
+              'Previous draw: ${result.lastDraw}\n${result.date}',
             ),
           ),
           onTap: () => _launchURL(result.url),

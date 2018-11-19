@@ -1,6 +1,7 @@
 import 'package:scoped_model/scoped_model.dart';
 import 'package:tatua/models/result.dart';
 import 'package:tatua/values/codes.dart';
+import 'package:tatua/values/consts.dart';
 import 'package:tatua/values/strings.dart';
 import 'package:http/http.dart' as http;
 
@@ -36,18 +37,29 @@ abstract class DrawModel extends Model {
   }
 
   search(String query) {
+    // final prevLen = '''   <td>331</td>
+    // 	                                <td>
+    // 		                                				                                		<a href="/winners/23375">Tazama Washindi Wote</a>
+    // 		                                				                            </td>
+    // 	                            </tr>
+    // 										                            <tr>
+    // 		                            <td>23374</td>
+    // 		                            <td>Sun 16th Sep 2018 - 6:10:00</td>
+    // 	                                '''
+    //     .length;
+    // print('$_tag the length is $prevLen');
     _isSearching = true;
     _drawsSearchResults.clear();
-    print('$_tag at search\nisSearching is $_isSearching');
+    // print('$_tag at search\nisSearching is $_isSearching');
     notifyListeners();
 
     final pageCountLimit = _limitValue.round();
 
     for (var curPage = 1; curPage <= pageCountLimit; curPage++) {
-      print('$_tag at for loop current page is $curPage');
-      print('$_tag progress value is $_progressValue');
+      // print('$_tag at for loop current page is $curPage');
+      // print('$_tag progress value is $_progressValue');
       if (!_isSearching) {
-        print('$_tag is not searching, breaking');
+        // print('$_tag is not searching, breaking');
         break;
       } else
         _fetchData(query, curPage);
@@ -67,9 +79,8 @@ abstract class DrawModel extends Model {
 
   _fetchData(String query, int curPage) async {
     print('$_tag at _fetchData');
-    final url =
-        '${regionMap[_selectedRegion]}$curPage'; //'$TATU_URL_HEAD$curPage';
-    print('the selected region is: $_selectedRegion\ncurrent url is: $url');
+    final url = '${regionMap[_selectedRegion]}$curPage';
+    // print('the selected region is: $_selectedRegion\ncurrent url is: $url');
     final http.Response res =
         await http.get(url, headers: {'User-Agent': 'Mozilla/5.0'});
 
@@ -98,8 +109,15 @@ abstract class DrawModel extends Model {
           body.indexOf('<td>', randomStartPosForDate) + '<td>'.length;
       final dateEndPos = body.indexOf('</td>', datePos);
       final date = body.substring(datePos, dateEndPos);
-      print('the date is $date');
-      final result = Result(pageUrl, curPage, date);
+      final randPrevDrawPos = queryPos - STEPS_TO_PREV_DRAW;
+      final lastDrawStartPos =
+          body.indexOf('<td>', randPrevDrawPos) + '<td>'.length;
+      final lastDrawEndPos = body.indexOf('</td>', lastDrawStartPos);
+      final lastDraw = body.substring(lastDrawStartPos, lastDrawEndPos);
+      print('$_tag the last draw was: $lastDraw');
+      // print('the date is $date');
+      final result = Result(
+          url: pageUrl, pageNumber: curPage, date: date, lastDraw: lastDraw);
       drawsSearchResults.add(result);
     }
 
