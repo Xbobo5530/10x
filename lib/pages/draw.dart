@@ -48,29 +48,36 @@ class DrawsPage extends StatelessWidget {
       ),
     );
 
-    final _regionSwitcher =
+    Widget _buildRegionToggle(RegionCode code) =>
         ScopedModelDescendant<MainModel>(builder: (_, __, model) {
-      return Row(children: <Widget>[
-        RadioListTile<RegionCode>(
-          title: Text(tzText),
-          groupValue: model.selectedRegion,
-          value: model.selectedRegion,
-          onChanged: (value) {
-            print('at on chaged');
-            model.setRegion(value);
-          },
-        ),
-        // Text(keText),
-      ]);
-    });
+          final Map<RegionCode, String> codeMap = {
+            RegionCode.TZ: tzText,
+            RegionCode.KE: keText
+          };
+          return Column(children: <Widget>[
+            Radio<RegionCode>(
+              // title: Text(tzText),
+              groupValue: model.selectedRegion,
+              value: code,
+              onChanged: (value) {
+                print('at on chaged');
+                model.setRegion(value);
+              },
+            ),
+            Text(
+              codeMap[code],
+              style: TextStyle(color: Colors.brown),
+            )
+          ]);
+        });
 
     final _fields = Row(
-      // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[Container(
-        width: 100.0,
-        child:_drawField),Container (
-          width: 100.0,
-          child:_regionSwitcher)],
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        _drawField,
+        _buildRegionToggle(RegionCode.TZ),
+        _buildRegionToggle(RegionCode.KE)
+      ],
     );
 
     final _searchButton = Row(
