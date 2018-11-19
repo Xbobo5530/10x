@@ -1,9 +1,10 @@
 import 'package:scoped_model/scoped_model.dart';
 import 'package:tatua/models/result.dart';
+import 'package:tatua/values/codes.dart';
 import 'package:tatua/values/strings.dart';
 import 'package:http/http.dart' as http;
 
-const tag = 'MainModel:';
+const _tag = 'MainModel:';
 
 abstract class DrawModel extends Model {
   StatusCode _drawsSearchStatus;
@@ -18,6 +19,16 @@ abstract class DrawModel extends Model {
   double get limitValue => _limitValue;
   double _progressValue = 0.0;
   double get progressValue => _progressValue;
+  RegionCode _selectedRegion = RegionCode.TZ;
+  RegionCode get selectedRegion => _selectedRegion;
+  bool _regionValue = false;
+  bool get regionValue => _regionValue;
+
+  void setRegion(RegionCode value) {
+    print('$_tag the value is: $value');
+    _selectedRegion = value;
+    notifyListeners();
+  }
 
   updateLimitValue(double newValue) {
     _limitValue = newValue;
@@ -27,16 +38,16 @@ abstract class DrawModel extends Model {
   search(String query) {
     _isSearching = true;
     _drawsSearchResults.clear();
-    print('$tag at search\nisSearching is $_isSearching');
+    print('$_tag at search\nisSearching is $_isSearching');
     notifyListeners();
 
     final pageCountLimit = _limitValue.round();
 
     for (var curPage = 1; curPage <= pageCountLimit; curPage++) {
-      print('$tag at for loop current page is $curPage');
-      print('$tag progress value is $_progressValue');
+      print('$_tag at for loop current page is $curPage');
+      print('$_tag progress value is $_progressValue');
       if (!_isSearching) {
-        print('$tag is not searching, breaking');
+        print('$_tag is not searching, breaking');
         break;
       } else
         _fetchData(query, curPage);
@@ -49,9 +60,16 @@ abstract class DrawModel extends Model {
     notifyListeners();
   }
 
+  Map<RegionCode, String> regionMap = {
+    RegionCode.TZ: TATU_URL_HEAD,
+    RegionCode.KE: TATU_KENYA_URL_HEAD
+  };
+
   _fetchData(String query, int curPage) async {
-    print('$tag at _fetchData');
-    final url = '$TATU_URL_HEAD$curPage';
+    print('$_tag at _fetchData');
+    final url =
+        '${regionMap[_selectedRegion]}$curPage'; //'$TATU_URL_HEAD$curPage';
+    print('the selected region is: $_selectedRegion\ncurrent url is: $url');
     final http.Response res =
         await http.get(url, headers: {'User-Agent': 'Mozilla/5.0'});
 
@@ -67,11 +85,12 @@ abstract class DrawModel extends Model {
   }
 
   _checkIfPageContainsQuery(String body, String query, int curPage) {
-    print('$tag at _checkIfPageContainsQuery');
+    print('$_tag at _checkIfPageContainsQuery');
     final queryPos = body.indexOf('<td>$query</td>');
     if (queryPos != -1) {
-      print('$tag found $query on page $curPage');
-      final pageUrl = '$TATU_URL_HEAD$curPage';
+      print('$_tag found $query on page $curPage');
+      final pageUrl =
+          '${regionMap[_selectedRegion]}$curPage'; //'$TATU_URL_HEAD$curPage';
       final randStartPost = 100;
       /*'375</td> <td>Sun 16th Sep 2018 - 6:20:00</td>'.length;*/
       final randomStartPosForDate = queryPos - randStartPost;
@@ -88,7 +107,7 @@ abstract class DrawModel extends Model {
       _isSearching = false;
       _searchResultMessage =
           'Finished searching and found ${_drawsSearchResults.length} results';
-      print('$tag at checking last page,\nisSearching is $_isSearching');
+      print('$_tag at checking last page,\nisSearching is $_isSearching');
     }
     _progressValue = curPage / _limitValue;
     notifyListeners();

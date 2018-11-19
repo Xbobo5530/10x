@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:tatua/models/main_model.dart';
+import 'package:tatua/values/codes.dart';
 import 'package:tatua/values/strings.dart';
 import 'package:tatua/views/results_item_view.dart';
 
@@ -13,13 +14,10 @@ class DrawsPage extends StatelessWidget {
     final _drawController = TextEditingController();
 
     _startSearch(MainModel model) {
-      print('start search is called');
-
       final draw = _drawController.text.trim();
-
       if (draw.isNotEmpty) {
         model.search(
-          draw, /*limit*/
+          draw,
         );
         _drawController.clear();
         FocusScope.of(context).requestFocus(FocusNode());
@@ -50,12 +48,29 @@ class DrawsPage extends StatelessWidget {
       ),
     );
 
+    final _regionSwitcher =
+        ScopedModelDescendant<MainModel>(builder: (_, __, model) {
+      return Row(children: <Widget>[
+        RadioListTile<RegionCode>(
+          title: Text(tzText),
+          groupValue: model.selectedRegion,
+          value: model.selectedRegion,
+          onChanged: (value) {
+            print('at on chaged');
+            model.setRegion(value);
+          },
+        ),
+        // Text(keText),
+      ]);
+    });
+
     final _fields = Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: <Widget>[
-        _drawField,
-//        _limitField,
-      ],
+      // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[Container(
+        width: 100.0,
+        child:_drawField),Container (
+          width: 100.0,
+          child:_regionSwitcher)],
     );
 
     final _searchButton = Row(

@@ -1,0 +1,1 @@
+enum RegionCode{TZ, KE}
