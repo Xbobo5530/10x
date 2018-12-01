@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:tatua/pages/draw.dart';
-import 'package:tatua/pages/run_down.dart';
-import 'package:tatua/values/strings.dart';
+import 'package:tatua/src/pages/draw.dart';
+import 'package:tatua/src/pages/run_down.dart';
+import 'package:tatua/src/values/strings.dart';
 
 class MyHomePage extends StatelessWidget {
   @override

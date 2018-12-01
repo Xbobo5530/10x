@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
-import 'package:tatua/models/main_model.dart';
-import 'package:tatua/values/strings.dart';
+import 'package:tatua/src/models/main_model.dart';
+import 'package:tatua/src/values/strings.dart';
 
 //class RundownPage extends StatefulWidget {
 //  @override

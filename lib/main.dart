@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:tatua/models/main_model.dart';
-import 'package:tatua/pages/draw.dart';
-import 'package:tatua/pages/home_page.dart';
-import 'package:tatua/values/strings.dart';
+import 'package:tatua/src/models/main_model.dart';
+import 'package:tatua/src/pages/home_page.dart';
+import 'package:tatua/src/values/strings.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 void main() => runApp(MyApp(model: MainModel()));

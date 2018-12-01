@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:scoped_model/scoped_model.dart';
-import 'package:tatua/models/main_model.dart';
-import 'package:tatua/values/codes.dart';
-import 'package:tatua/values/strings.dart';
-import 'package:tatua/views/results_item_view.dart';
+import 'package:tatua/src/models/main_model.dart';
+import 'package:tatua/src/values/codes.dart';
+import 'package:tatua/src/values/strings.dart';
+import 'package:tatua/src/views/results_item_view.dart';
 
 const tag = 'DrawsPage:';
 

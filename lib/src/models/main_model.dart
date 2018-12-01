@@ -1,8 +1,8 @@
 import 'package:scoped_model/scoped_model.dart';
-import 'package:tatua/models/result.dart';
-import 'package:tatua/values/codes.dart';
-import 'package:tatua/values/consts.dart';
-import 'package:tatua/values/strings.dart';
+import 'package:tatua/src/models/result.dart';
+import 'package:tatua/src/values/codes.dart';
+import 'package:tatua/src/values/consts.dart';
+import 'package:tatua/src/values/strings.dart';
 import 'package:http/http.dart' as http;
 
 const _tag = 'MainModel:';
@@ -37,17 +37,6 @@ abstract class DrawModel extends Model {
   }
 
   search(String query) {
-    // final prevLen = '''   <td>331</td>
-    // 	                                <td>
-    // 		                                				                                		<a href="/winners/23375">Tazama Washindi Wote</a>
-    // 		                                				                            </td>
-    // 	                            </tr>
-    // 										                            <tr>
-    // 		                            <td>23374</td>
-    // 		                            <td>Sun 16th Sep 2018 - 6:10:00</td>
-    // 	                                '''
-    //     .length;
-    // print('$_tag the length is $prevLen');
     _isSearching = true;
     _drawsSearchResults.clear();
     // print('$_tag at search\nisSearching is $_isSearching');

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tatua/models/result.dart';
-import 'package:tatua/values/consts.dart';
+import 'package:tatua/src/models/result.dart';
+import 'package:tatua/src/values/consts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ResultItemView extends StatelessWidget {
