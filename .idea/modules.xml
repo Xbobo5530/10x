@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/tatua.iml" filepath="$PROJECT_DIR$/tatua.iml" />
-      <module fileurl="file://$PROJECT_DIR$/tatua_android.iml" filepath="$PROJECT_DIR$/tatua_android.iml" />
     </modules>
   </component>
 </project>
